@@ -6,6 +6,13 @@
 int main() {
     BigNum num1, num2, num3, num4;
 
+    bigNumInit( &num1, 32 );
+    bigNumInit( &num2, 32 );
+    bigNumSetDec( &num1, "8765432187654321");
+    bigNumSetDec( &num1, "87654321");
+    bigNumSub( &num3, &num1, &num2 );
+    bigNumPrintDec( &num3 );
+    return 0;
     // 9756277979052589857
     bigNumInit( &num1, 128 );
     bigNumSetHex( &num1, "8765432187654321");

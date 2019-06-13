@@ -1,11 +1,12 @@
 # BigNum
 computer programming course final project
 implement Big Number library in c
+
 # Required
-- [ ] Initialization
-- [ ] Free
-- [ ] Comparison
-- [ ] Addition
+- [x] Initialization
+- [x] Free
+- [x] Comparison
+- [x] Addition
 - [ ] Deletion
 - [ ] Multiplication
 - [ ] Division
@@ -17,9 +18,14 @@ implement Big Number library in c
 - [ ] Set
 - [ ] GCD
 - [ ] LCM
+
+# ToDo
+- [ ] handle negative number
+
 # Feature
-- [ ] is Prime
-- [ ] Nth Root
+- [ ] isPrime
+- [ ] coPrime
 - [ ] Nth Fib Num
+- [ ] Nth Root
 - [ ] Log
 - [ ] PI
