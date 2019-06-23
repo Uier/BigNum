@@ -2,16 +2,27 @@
 #include <stdlib.h>
 
 #include "bignum.h"
+#include "mymacro.h"
 
 int main() {
     BigNum num1, num2, num3, num4;
 
     bigNumInit( &num1, 32 );
     bigNumInit( &num2, 32 );
-    bigNumSetDec( &num1, "8765432187654321");
-    bigNumSetDec( &num1, "87654321");
-    bigNumSub( &num3, &num1, &num2 );
+    bigNumInit( &num3, 4096 );
+    bigNumSetBin( &num1, "1000");
+    bigNumSetHex( &num2, "A1");
+    bigNumPow( &num3, &num1, &num2 );
+    // bigNumAdd( &num3, &num1, &num2 );
+    // bigNumSetDec( &num1, "8" );
     bigNumPrintDec( &num3 );
+    bigNumPrintBin( &num3 );
+    bigNumPrintHex( &num3 );
+    // bigNumPrintDec( &num1 );
+    // bigNumPow( &num2, &num3, &num1 );
+    bigNumFree( &num1 );
+    bigNumFree( &num2 );
+    bigNumFree( &num3 );
     return 0;
     // 9756277979052589857
     bigNumInit( &num1, 128 );

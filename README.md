@@ -7,15 +7,15 @@ implement Big Number library in c
 - [x] Free
 - [x] Comparison
 - [x] Addition
-- [ ] Deletion
-- [ ] Multiplication
-- [ ] Division
+- [x] Subtraction
+- [x] Multiplication
+- [x] Division
 - [ ] Power
 - [ ] Factorial
 - [ ] Permutation
 - [ ] Combination
-- [ ] Print
-- [ ] Set
+- [x] Print
+- [x] Set
 - [ ] GCD
 - [ ] LCM
 
