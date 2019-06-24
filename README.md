@@ -10,21 +10,20 @@ implement Big Number library in c
 - [x] Subtraction
 - [x] Multiplication
 - [x] Division
-- [ ] Power
-- [ ] Factorial
-- [ ] Permutation
-- [ ] Combination
+- [x] Power
+- [x] Factorial
+- [x] Permutation
+- [x] Combination
 - [x] Print
 - [x] Set
-- [ ] GCD
-- [ ] LCM
+- [x] GCD
+- [x] LCM
 
 # ToDo
 - [ ] handle negative number
 
 # Feature
 - [ ] isPrime
-- [ ] coPrime
 - [ ] Nth Fib Num
 - [ ] Nth Root
 - [ ] Log

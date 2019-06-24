@@ -268,7 +268,7 @@ void bigNumPrintHex( const BigNum *pObj ) {
 		__bigNumCpy(&Cpy, &PowerOf16);
 		bigNumDiv(&PowerOf16, &Rem, &Cpy, &Hex);
 	}
-	for ( int idx=0; idx<=exp; ++idx ) {
+	for ( int32_t idx=0; idx<=exp; ++idx ) {
 		if ( bit[idx] >= 10 )	printf("%c", ('A'+bit[idx]-10));
 		else	printf("%d", bit[idx]);
 	}
@@ -385,14 +385,14 @@ int32_t bigNumDiv( BigNum *pQuotient, BigNum *pRemainder, const BigNum *pObj1, c
 		}
 		len2 = __getIdx(&p2);
 		while ( len2 < len1 || p2.data[len2]*10 <= p1.data[len1] ) {
-			p2.data[len2] *= 10;
+			for ( int32_t idx=0; idx<=len2; ++idx )	p2.data[idx] *= 10;
 			__carry(&p2);
 			len2 = __getIdx(&p2);
 		}
 		char *s = malloc(sizeof(char)*((len1+1)*4+1));
 		int pt = 0;
 		for ( int32_t idx=0; idx<(len1+1)*4; ++idx)	s[idx] = '0';
-		while ( __getIdx(&p2) > 0 || p2.data[0] != 0 ) {
+		while ( bigNumCmp(&p2, pObj2) >= 0 ) {
 			if ( bigNumCmp(&p1,&p2) > 0 ) {
 				s[pt]++;
 				BigNum pAns;
@@ -408,7 +408,6 @@ int32_t bigNumDiv( BigNum *pQuotient, BigNum *pRemainder, const BigNum *pObj1, c
 				__divideTen(&p2);
 				pt++;
 			}
-			
 		}
 		s[pt] = '\0';
 		char *t = s;
@@ -417,6 +416,7 @@ int32_t bigNumDiv( BigNum *pQuotient, BigNum *pRemainder, const BigNum *pObj1, c
 		__bigNumCpy(pRemainder,&p1);
 		bigNumFree(&p1);
 		bigNumFree(&p2);
+		free(s);
 	}
 	return 0;
 }
@@ -482,32 +482,104 @@ int32_t bigNumPermutation( BigNum *pAns, const BigNum *pN, const BigNum *pK ) {
 		__increment(pAns);
 		return 0;
 	}
-	BigNum Obj, Cpy;
-	__bigNumInitSize(&Cpy, pN->size);
+	BigNum Obj, Cpy, Mul;
 	__bigNumInitSize(&Obj, pK->size);
+	__bigNumInitSize(&Cpy, pN->size);
+	__bigNumInitSize(&Mul, pN->size);
 	__bigNumCpy(&Obj, pK);
+	__bigNumCpy(&Mul, pN);
 	__bigNumCpy(pAns, pN);
 	__decrement(&Obj);
+	__decrement(&Mul);
 	while ( __getIdx(&Obj) > 0 || Obj.data[0] > 0 ) {
 	 	__bigNumCpy(&Cpy, pAns);
-		bigNumMul(pAns, &Cpy, &Obj);
+		bigNumMul(pAns, &Cpy, &Mul);
 		__decrement(&Obj);
+		__decrement(&Mul);
 	}
 	bigNumFree(&Obj);
 	bigNumFree(&Cpy);
+	bigNumFree(&Mul);
 	return 0;
 }
 
 int32_t bigNumCombination( BigNum *pAns, const BigNum *pN, const BigNum *pK ) {
-
+	int32_t res = bigNumCmp(pN, pK);
+	if ( res < 0 )	return -1;
+	else if ( res == 0 || (__getIdx(pK) == 0 && pK->data[0] == 0) ) {
+		__returnZero(pAns);
+		__increment(pAns);
+		return 0;
+	}
+	BigNum Obj, Cpy, Mul, Rem;
+	__bigNumInitSize(&Obj, pK->size);
+	__bigNumInitSize(&Cpy, pN->size);
+	__bigNumInitSize(&Mul, pN->size);
+	__bigNumInitSize(&Rem, 1);
+	__bigNumCpy(&Obj, pK);
+	__bigNumCpy(&Mul, pN);
+	__bigNumCpy(pAns, pN);
+	__decrement(&Obj);
+	__decrement(&Mul);
+	while ( __getIdx(&Obj) > 0 || Obj.data[0] > 0 ) {
+	 	__bigNumCpy(&Cpy, pAns);
+		bigNumMul(pAns, &Cpy, &Mul);
+		__decrement(&Obj);
+		__decrement(&Mul);
+	}
+	__bigNumCpy(&Mul, pK);
+	bigNumFactorial(&Obj, &Mul);
+	__bigNumCpy(&Cpy, pAns);
+	bigNumDiv(pAns, &Rem, &Cpy, &Obj);
+	bigNumFree(&Obj);
+	bigNumFree(&Cpy);
+	bigNumFree(&Mul);
+	bigNumFree(&Rem);
+	return 0;
 }
 
 int32_t bigNumGCD( BigNum *pAns, const BigNum *pObj1, const BigNum *pObj2 ) {
-
+	__bigNumCpy(pAns, pObj1);
+	BigNum Quo, Cpy, p2;
+	__bigNumInitSize(&Quo, 1);
+	__bigNumInitSize(&Cpy, max(pObj1->size, pObj2->size));
+	__bigNumInitSize(&p2, max(pObj1->size, pObj2->size));
+	__bigNumCpy(&p2, pObj2);
+	while ( __getIdx(&p2) > 0 || p2.data[0] > 0 ) {
+		bigNumDiv(&Quo, &Cpy, pAns, &p2);
+		__bigNumCpy(pAns, &p2);
+		__bigNumCpy(&p2, &Cpy);
+	}
+	bigNumFree(&Quo);
+	bigNumFree(&Cpy);
+	bigNumFree(&p2);
+	return 0;
 }
 
 int32_t bigNumLCM( BigNum *pAns, const BigNum *pObj1, const BigNum *pObj2 ) {
-
+	__bigNumCpy(pAns, pObj1);
+	BigNum Quo, Cpy, p1, p2;
+	__bigNumInitSize(&Quo, 1);
+	__bigNumInitSize(&Cpy, max(pObj1->size, pObj2->size));
+	__bigNumInitSize(&p1, max(pObj1->size, pObj2->size));
+	__bigNumInitSize(&p2, max(pObj1->size, pObj2->size));
+	__bigNumCpy(&p2, pObj2);
+	while ( __getIdx(&p2) > 0 || p2.data[0] > 0 ) {
+		bigNumDiv(&Quo, &Cpy, pAns, &p2);
+		__bigNumCpy(pAns, &p2);
+		__bigNumCpy(&p2, &Cpy);
+	}
+	bigNumDiv(&p1, &Quo, pObj1, pAns);
+	bigNumDiv(&p2, &Quo, pObj2, pAns);
+	__bigNumCpy(&Cpy, pAns);
+	bigNumMul(pAns, &Cpy, &p1);
+	__bigNumCpy(&Cpy, pAns);
+	bigNumMul(pAns, &Cpy, &p2);
+	bigNumFree(&Quo);
+	bigNumFree(&Cpy);
+	bigNumFree(&p1);
+	bigNumFree(&p2);
+	return 0;
 }
 
 int32_t isPrime( const BigNum *pObj ) {
