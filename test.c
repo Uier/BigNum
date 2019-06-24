@@ -5,36 +5,22 @@
 #include "mymacro.h"
 
 int main() {
-    BigNum num1, num2, num3, num4;
+    BigNum num1;
+    BigNum num2, num3, num4;
 
-    __bigNumInitSize( &num1, 700 );
+    __bigNumInitSize( &num1, 1000 );
+    __bigNumInitSize( &num2, 1000 );
+    // __bigNumInitSize( &num3, 700 );
+    // __bigNumInitSize( &num4, 700 );
     // bigNumInit( &num1, 4096 );
-    // bigNumInit( &num2, 1024 );
-    __bigNumInitSize( &num3, 700 );
     // bigNumInit( &num3, 4096 );
-    bigNumSetDec( &num1, "1000");
-    // bigNumSetDec( &num2, "6");
-    // bigNumCombination( &num3, &num1, &num2 );
-    // bigNumSetDec( &num3, "6");
-    // bigNumAdd( &num3, &num1, &num2 );
-    // bigNumSetDec( &num1, "8" );
-    bigNumFactorial( &num3, &num1 );
-    bigNumPrintDec( &num3 );
-    // bigNumPrintBin( &num3 );
-    // bigNumPrintHex( &num3 );
-    // bigNumPrintDec( &num1 );
-    // bigNumGCD( &num3, &num1, &num2 );
-    // bigNumPrintDec( &num3 );
-    // bigNumPrintBin( &num3 );
-    // bigNumPrintHex( &num3 );
-    // bigNumPow( &num2, &num3, &num1 );
-    // bigNumLCM( &num3, &num1, &num2 );
-    // bigNumPrintDec( &num3 );
-    // bigNumPrintBin( &num3 );
-    // bigNumPrintHex( &num3 );
+    bigNumSetDec( &num2, "10000" );
+    NthFibonacci( &num1, &num2 );
+    bigNumPrintDec( &num1 );
     bigNumFree( &num1 );
     bigNumFree( &num2 );
-    bigNumFree( &num3 );
+    // bigNumFree( &num3 );
+    // bigNumFree( &num4 );
     
     return 0;
     // 9756277979052589857
@@ -48,9 +34,9 @@ int main() {
     bigNumInit( &num2, 128 );
     bigNumSetHex( &num2, "1234567812345678");
     bigNumPrintHex( &num2 );
-    bigNumFree( &num1 );
-    bigNumFree( &num2 );
-    return 0;
+    // bigNumFree( &num1 );
+    // bigNumFree( &num2 );
+    // return 0;
 
     // 11068046444225730969
     bigNumAdd( &num3, &num1, &num2 );

@@ -77,6 +77,12 @@ int32_t bigNumLCM( BigNum *pAns, const BigNum *pObj1, const BigNum *pObj2 );
 // check obj is prime, 1 true, 0 false
 int32_t isPrime( const BigNum *pObj );
 
+// square root of obj
+int32_t bigNumSQRT( BigNum *pAns, const BigNum *pObj );
+
+// n-th Fibonacci number
+int32_t NthFibonacci( BigNum *pAns, BigNum *pN );
+
 int32_t __overflow(const char* file, const int32_t line, const char* func) {
 	printf("%s:%d:%s\n", file, line, func);
 	puts("overflow! please initialize BigNum with a larger bit number.");
@@ -349,6 +355,9 @@ int32_t bigNumMul( BigNum *pAns, const BigNum *pObj1, const BigNum *pObj2 ) {
 }
 
 int32_t bigNumDiv( BigNum *pQuotient, BigNum *pRemainder, const BigNum *pObj1, const BigNum *pObj2 ) {
+	if ( __getIdx(pObj2) && pObj2->data[0] == 0 )	return -1;
+	__bigNumCpy(pQuotient, pObj1);
+	__bigNumCpy(pRemainder, pObj2);
 	__returnZero(pQuotient);
 	__returnZero(pRemainder);
 	int32_t res = bigNumCmp(pObj1, pObj2);
@@ -583,5 +592,152 @@ int32_t bigNumLCM( BigNum *pAns, const BigNum *pObj1, const BigNum *pObj2 ) {
 }
 
 int32_t isPrime( const BigNum *pObj ) {
+	BigNum Idx, SQRT, Quo, Rem;
+	__bigNumInitSize(&Idx, pObj->size);
+	__bigNumInitSize(&SQRT, pObj->size);
+	__bigNumInitSize(&Quo, 1);
+	__bigNumInitSize(&Rem, 1);
+	bigNumSQRT(&SQRT, pObj);
+	Idx.data[0] = 2;
+	bool isPrime = true;
+	if ( bigNumCmp(pObj, &Idx) < 0 || ((pObj->data[0])&1) == 0 )	isPrime = false;
+	if ( isPrime ) {
+		__increment(&Idx);
+		while ( bigNumCmp(&Idx, &SQRT) <= 0 ) {
+			bigNumDiv(&Quo, &Rem, pObj, &Idx);
+			if ( __getIdx(&Rem) == 0 && Rem.data[0] == 0 ) {
+				isPrime = false;
+				break;
+			}
+			__increment(&Idx);
+			__increment(&Idx);
+		}
+	}
+	bigNumFree(&Idx);
+	bigNumFree(&SQRT);
+	bigNumFree(&Quo);
+	bigNumFree(&Rem);
+	return isPrime;
+}
 
+int32_t bigNumSQRT( BigNum *pAns, const BigNum *pObj ) {
+	int32_t len = __getIdx(pObj);
+	__bigNumCpy(pAns, pObj);
+	__returnZero(pAns);
+	BigNum Left, Right, Mid, Rem, Two;
+	__bigNumInitSize(&Left, pObj->size);
+	__bigNumInitSize(&Right, pObj->size);
+	__bigNumInitSize(&Mid, pObj->size);
+	__bigNumInitSize(&Rem, 1);
+	__bigNumInitSize(&Two, 1);
+	__bigNumCpy(&Right, pObj);
+	Two.data[0] = 2;
+	while ( bigNumCmp(&Left, &Right) < 0 ) {
+		// printf("L: ");
+		// bigNumPrintDec(&Left);
+		// printf("R: ");
+		// bigNumPrintDec(&Right);
+		bigNumAdd(pAns, &Left, &Right);
+		bigNumDiv(&Mid, &Rem, pAns, &Two);
+		bigNumMul(pAns, &Mid, &Mid);
+		int32_t res = bigNumCmp(pAns, pObj);
+		if ( res == 0 ) {
+			__bigNumCpy(pAns, &Mid);
+			break;
+		} else if ( res < 0 )	__bigNumCpy(&Left, &Mid);
+		else	__bigNumCpy(&Right, &Mid);
+		bigNumSub(pAns, &Right, &Left);
+		if ( __getIdx(pAns) == 0 && pAns->data[0] == 1 ) {
+			__bigNumCpy(pAns, &Left);
+			break;
+		}
+	}
+	bigNumFree(&Left);
+	bigNumFree(&Right);
+	bigNumFree(&Mid);
+	bigNumFree(&Rem);
+	bigNumFree(&Two);
+	return 0;
+}
+
+void BxM(BigNum B[2][2], BigNum M[2][2], BigNum temp[2][2]) {
+	for ( int32_t i=0; i<2; ++i )
+		for ( int32_t j=0; j<2; ++j )
+			__bigNumInitSize(&temp[i][j], B[0][0].size+M[0][0].size);
+	BigNum Cpy1, Cpy2;
+	__bigNumInitSize(&Cpy1, B[0][0].size+M[0][0].size);
+	__bigNumInitSize(&Cpy2, B[0][0].size+M[0][0].size);
+	for ( int32_t i=0; i<2; ++i )
+		for ( int32_t j=0; j<2; ++j )
+			for ( int32_t k=0; k<2; ++k ) {
+				bigNumMul(&Cpy1, &B[i][k], &M[k][j]);
+				__bigNumCpy(&Cpy2, &temp[i][j]);
+				bigNumAdd(&temp[i][j], &Cpy1, &Cpy2);
+			}
+	for ( int32_t i=0; i<2; ++i )
+		for ( int32_t j=0; j<2; ++j ) {
+			__bigNumCpy(&B[i][j], &temp[i][j]);
+			bigNumFree(&temp[i][j]);
+		}
+	bigNumFree(&Cpy1);
+	bigNumFree(&Cpy2);
+}
+void MxM(BigNum M[2][2], BigNum temp[2][2]) {
+	for ( int32_t i=0; i<2; ++i )
+		for ( int32_t j=0; j<2; ++j )
+			__bigNumInitSize(&temp[i][j], M[0][0].size+M[0][0].size);
+	BigNum Cpy1, Cpy2;
+	__bigNumInitSize(&Cpy1, M[0][0].size+M[0][0].size);
+	__bigNumInitSize(&Cpy2, M[0][0].size+M[0][0].size);
+	for ( int32_t i=0; i<2; ++i )
+		for ( int32_t j=0; j<2; ++j )
+			for ( int32_t k=0; k<2; ++k ) {
+				bigNumMul(&Cpy1, &M[i][k], &M[k][j]);
+				__bigNumCpy(&Cpy2, &temp[i][j]);
+				bigNumAdd(&temp[i][j], &Cpy1, &Cpy2);
+			}
+	for ( int32_t i=0; i<2; ++i )
+		for ( int32_t j=0; j<2; ++j ) {
+			__bigNumCpy(&M[i][j], &temp[i][j]);
+			bigNumFree(&temp[i][j]);
+		}
+	bigNumFree(&Cpy1);
+	bigNumFree(&Cpy2);
+}
+int32_t NthFibonacci( BigNum *pAns, BigNum *pN ) {
+	BigNum M[2][2], B[2][2], temp[2][2];
+	for ( int32_t i=0; i<2; ++i )
+		for ( int32_t j=0; j<2; ++j ) {
+			bigNumInit(&M[i][j], 32);
+			bigNumInit(&B[i][j], 32);
+			if ( i != 1 || j != 1 )	M[i][j].data[0] = 1;
+			if ( i == j )	B[i][j].data[0] = 1;
+		}
+	BigNum Cpy, Rem, Two;
+	__bigNumInitSize(&Cpy, 1);
+	__bigNumInitSize(&Rem, 1);
+	__bigNumInitSize(&Two, 1);
+	Two.data[0] = 2;
+	if ( bigNumCmp(pN, &Two) >= 0 ) {
+		__decrement(pN); // pN -= 1;
+		__decrement(pN); // pN -= 1;
+		while ( __getIdx(pN) > 0 || pN->data[0] > 0 ) {
+			if ( ((pN->data[0])&1) )	BxM(B, M, temp);
+			MxM(M, temp);
+			__bigNumCpy(&Cpy, pN);
+			bigNumDiv(pN, &Rem, &Cpy, &Two);
+		}
+		bigNumAdd(pAns, &B[0][0], &B[0][1]);
+	} else {
+		__bigNumCpy(pAns, &B[0][pN->data[0]]);
+	}
+	for ( int32_t i=0; i<2; ++i )
+		for ( int32_t j=0; j<2; ++j ) {
+			bigNumFree(&M[i][j]);
+			bigNumFree(&B[i][j]);
+		}
+	bigNumFree(&Cpy);
+	bigNumFree(&Rem);
+	bigNumFree(&Two);
+	return 0;
 }
